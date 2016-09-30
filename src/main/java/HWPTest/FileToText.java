@@ -15,23 +15,47 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 
 import com.argo.hwp.HwpTextExtractor;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
-
+/*
+ * org.apache.poi 라이브러리
+ * 아파치 소프트웨어 재단에서 만든 라이브러리로서 마이크로소프트 오피스 파일 포맷을 순수 자바 언어로서 읽고 쓰는 기능을 제공한다
+ * 
+ */
 public class FileToText {
 	
-	public static String fileToText(String fileName){
-		if(fileName.endsWith("hwp")){
-			return hwpFileContentParser(fileName);
-		}else if(fileName.endsWith("docx")){
-			return docxFileContentParser(fileName);
-		}else if(fileName.endsWith("doc")){
-			return docFileContentParser(fileName);
+	private static String result;
+	
+	/*
+	 * 파라미터 1 : 현재 파일 경로 및 이름 
+	 * 파라미터 2 : 저장할 경로
+	 * 파라미터 3 : 저장할 파일 이름
+	 */ 
+	public static boolean fileTotxtFile(String currentPath,String savePath,String saveFilename){
+		if(currentPath.endsWith("hwp")){
+			result = hwpFileContentParser(currentPath);
+			if(!errorTest(result)){
+				return false;
+			}
+			return stringToFile(savePath,saveFilename,result);
+		}else if(currentPath.endsWith("docx")){
+			result = docxFileContentParser(currentPath);
+			if(!errorTest(result)){
+				return false;
+			}
+			return stringToFile(savePath,saveFilename,result); 
+		}else if(currentPath.endsWith("doc")){
+			result = docFileContentParser(currentPath);
+			if(!errorTest(result)){
+				return false;
+			}
+			return stringToFile(savePath,saveFilename,result);
 		}else{
-			return "";
+			return false;
 		}
 	}
 
@@ -40,12 +64,15 @@ public class FileToText {
 		File hwp = new File(fileName); // 텍스트를 추출할 HWP 파일
 		Writer writer = new StringWriter(); // 추출된 텍스트를 출력할 버퍼
 		try {
+			// 파일로부터 텍스트 추출
 			HwpTextExtractor.extract(hwp, writer);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
-		} // 파일로부터 텍스트 추출
+			return "-1";
+		} 
 		String text = writer.toString(); // 추출된 텍스트
 
 		return text;
@@ -74,9 +101,10 @@ public class FileToText {
 			}
 
 		} catch (Exception e) {
-			System.out.println("document file cant be indexed");
+//			System.out.println("document file cant be indexed");
+			return "-1";
 		}
-		return "";
+		return "-1";
 	}
 
 	// docx, xlsx, pptx 파서
@@ -97,8 +125,38 @@ public class FileToText {
 				return xe.getText();
 			}
 		} catch (Exception e) {
-			System.out.println("# DocxFileParser Error :" + e.getMessage());
+//			System.out.println("# DocxFileParser Error :" + e.getMessage());
+			return "-1";
 		}
-		return "";
+		return "-1";
+	}
+	
+	private static boolean stringToFile(String path,String fileName,String content){
+		String url = path;
+		if(!fileName.endsWith(".txt")){
+			fileName = fileName.concat(".txt");
+		}
+		if(path.endsWith("/")){
+			url = path+fileName;
+		}else{
+			url = path+"/"+fileName;
+		}
+		
+		try {
+			FileUtils.writeStringToFile(new File(url), content, "UTF-8");
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	//결과가 -1이면 에러 
+	private static boolean errorTest(String result){
+		if(result.equals("-1")){
+			return false;
+		}
+		return true;
 	}
 }
+
