@@ -1,17 +1,31 @@
 package HWPTest;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.List;
 
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
+
+/*
+ * 추가된경우 $add 
+ * 삭제된경우 $del
+ * 변경된경우 $cha 
+ * 붙여서 한개로 만들어줌.
+ * 
+ */
 public class textComapre {
-	public static void main(String[] args) throws IOException {
-		
-		String currentPath = "/Users/kangjungu1/Downloads/02.docx";
-		String savePath = "/Users/kangjungu1/Downloads";
-		String saveFilename = "5.txt";
-		
-		FileToText.fileTotxtFile(currentPath, savePath, saveFilename);
-	}
 
+
+	public static void main(String[] args) throws IOException {
+		System.out.println("!");
+		String result = FileToText.compareText("/Users/kangjungu1/Downloads/01.docx","/Users/kangjungu1/Downloads/02.docx");
+		System.out.println("result\n" + result);
+		System.out.println("!");
+	}
+	
 }
