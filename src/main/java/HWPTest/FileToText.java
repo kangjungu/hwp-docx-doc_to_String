@@ -34,7 +34,6 @@ import org.apache.poi.hwpf.extractor.WordExtractor;
  * 아파치 소프트웨어 재단에서 만든 라이브러리로서 마이크로소프트 오피스 파일 포맷을 순수 자바 언어로서 읽고 쓰는 기능을 제공한다
  */
 
-//해야할일 : 쓰레드로 하기, byte[] 주는 메소드 만들기
 public class FileToText {
 
 	private static String result;
@@ -149,7 +148,7 @@ public class FileToText {
 	}
 
 	// docx, xlsx, pptx에서 내용을 가져온다.
-	public static String docxFileContentParser(String fileName) {
+	private static String docxFileContentParser(String fileName) {
 		try {
 			FileInputStream fs = new FileInputStream(new File(fileName));
 			OPCPackage d = OPCPackage.open(fs);
