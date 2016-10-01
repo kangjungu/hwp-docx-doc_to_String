@@ -22,11 +22,8 @@ public class textComapre {
 
 
 	public static void main(String[] args) throws IOException {
-		byte[] result = FileToText.compareTextToByte("/Users/kangjungu1/Downloads/01.docx","/Users/kangjungu1/Downloads/02.docx");
-
-		for(int i=0;i<result.length;i++){
-			System.out.print(result[i]);
-		}
+		String result[] = FileToText.compareText("/Users/kangjungu1/Downloads/1.docx","/Users/kangjungu1/Downloads/2.docx");
+		System.out.println(result[1]);
 	}
 	
 }

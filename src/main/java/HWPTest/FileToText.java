@@ -34,79 +34,82 @@ import org.apache.poi.hwpf.extractor.WordExtractor;
  * 아파치 소프트웨어 재단에서 만든 라이브러리로서 마이크로소프트 오피스 파일 포맷을 순수 자바 언어로서 읽고 쓰는 기능을 제공한다
  */
 
+//할일 del 부분 넣기, 이전꺼 text도 보내기 
 public class FileToText {
 
 	private static String result;
-	private static Hashtable<Integer, List<?>> hash;
+	private static Hashtable<Integer, List<?>> changeAdd;
+	private static List<Integer> delete;
 	private static Hashtable<Integer, String> typeHash;
 
 	/*
-	 * 두개의 파일을 내용을 비교해주고 byte[]로 보내주는 메소드 
-	 *  파라미터 1 : 이전 버전  파일 경로
-	 *  파라미터 2 : 다음 버전 파일 경로 
+	 * 두개의 파일을 내용을 비교해주고 byte[]로 보내주는 메소드 파라미터 1 : 이전 버전 파일 경로 파라미터 2 : 다음 버전 파일
+	 * 경로
 	 */
-	public static byte[] compareTextToByte(String firstFile,String secondFile){
+	public static byte[] compareTextToByte(String firstFile, String secondFile) {
 		String firstString = "";
 		String secondString = "";
-		if(firstFile.endsWith("hwp")){
+		if (firstFile.endsWith("hwp")) {
 			firstString = hwpFileContentParser(firstFile);
-		}else if(firstFile.endsWith("docx")){
+		} else if (firstFile.endsWith("docx")) {
 			firstString = docxFileContentParser(firstFile);
-		}else if(firstFile.endsWith("doc")){
+		} else if (firstFile.endsWith("doc")) {
 			firstString = docFileContentParser(firstFile);
-		}else{
+		} else {
 			return "error".getBytes();
 		}
-		
-		if(secondFile.endsWith("hwp")){
+
+		if (secondFile.endsWith("hwp")) {
 			secondString = hwpFileContentParser(secondFile);
-		}else if(secondFile.endsWith("docx")){
+		} else if (secondFile.endsWith("docx")) {
 			secondString = docxFileContentParser(secondFile);
-		}else if(secondFile.endsWith("doc")){
+		} else if (secondFile.endsWith("doc")) {
 			secondString = docFileContentParser(secondFile);
-		}else{
+		} else {
 			return "error".getBytes();
 		}
-		
-		String result = getDiff(firstString,secondString,"\n");
-		
+
+		String result = getDiff(firstString, secondString, "\n");
+
 		return result.getBytes();
 	}
+
 	/*
-	 * 두개의 파일을 내용을 비교해주는 메소드
-	 *  파라미터 1 : 이전 버전  파일 경로
-	 *  파라미터 2 : 다음 버전 파일 경로 
+	 * 두개의 파일을 내용을 비교해주는 메소드 파라미터 1 : 이전 버전 파일 경로 파라미터 2 : 다음 버전 파일 경로
 	 */
-	public static String compareText(String firstFile, String secondFile){
+	public static String[] compareText(String firstFile, String secondFile) {
 		String firstString = "";
 		String secondString = "";
-		if(firstFile.endsWith("hwp")){
+		String returnResult[] = new String[] { "error", "error" };
+		if (firstFile.endsWith("hwp")) {
 			firstString = hwpFileContentParser(firstFile);
-		}else if(firstFile.endsWith("docx")){
+		} else if (firstFile.endsWith("docx")) {
 			firstString = docxFileContentParser(firstFile);
-		}else if(firstFile.endsWith("doc")){
+		} else if (firstFile.endsWith("doc")) {
 			firstString = docFileContentParser(firstFile);
-		}else{
-			return "error";
+		} else {
+			return returnResult;
 		}
-		
-		if(secondFile.endsWith("hwp")){
+
+		if (secondFile.endsWith("hwp")) {
 			secondString = hwpFileContentParser(secondFile);
-		}else if(secondFile.endsWith("docx")){
+		} else if (secondFile.endsWith("docx")) {
 			secondString = docxFileContentParser(secondFile);
-		}else if(secondFile.endsWith("doc")){
+		} else if (secondFile.endsWith("doc")) {
 			secondString = docFileContentParser(secondFile);
-		}else{
-			return "error";
+		} else {
+			return returnResult;
 		}
-		
-		String result = getDiff(firstString,secondString,"\n");
-		
-		return result;
+
+		String result = getDiff(firstString, secondString, "\n");
+		returnResult[0] = firstString;
+		returnResult[1] = result;
+		return returnResult;
 	}
-	
-	/* 파일을 텍스트파일로 변환해서 저장해주는 메소드
-	 * 파라미터 1 : 현재 파일 경로 및 이름 파라미터 2 : 저장할 경로 파라미터 3 : 저장할 파일 이름
+
+	/*
+	 * 파일을 텍스트파일로 변환해서 저장해주는 메소드 파라미터 1 : 현재 파일 경로 및 이름 파라미터 2 : 저장할 경로 파라미터 3 :
+	 * 저장할 파일 이름
 	 */
 	public static boolean fileTotxtFile(String currentPath, String savePath, String saveFilename) {
 		if (currentPath.endsWith("hwp")) {
@@ -173,7 +176,7 @@ public class FileToText {
 			}
 
 		} catch (Exception e) {
-//			 System.out.println("document file cant be indexed");
+			// System.out.println("document file cant be indexed");
 			return "-1";
 		}
 		return "-1";
@@ -224,57 +227,84 @@ public class FileToText {
 		}
 	}
 
-	//두개의 스트링을 비교해서 다른부분에 태그 붙여준다
+	// 두개의 스트링을 비교해서 다른부분에 태그 붙여준다
 	private static String getDiff(String firstFile, String secondFile, String splitValue) {
 		
+		//원본 내용
 		List<String> original = new ArrayList<String>(Arrays.asList(firstFile.split(splitValue)));
+		//두번째 파일 내용
 		List<String> revised = new ArrayList<String>(Arrays.asList(secondFile.split(splitValue)));
 		
-		hash = new Hashtable<Integer, List<?>>();
+		//변경사항 저장할 변수들 초기화 
+		changeAdd = new Hashtable<Integer, List<?>>();
+		delete = new ArrayList<Integer>();
 		typeHash = new Hashtable<>();
+		
+		//변경된 부분을 가져온다.
 		Patch patch = DiffUtils.diff(original, revised);
-		// 각각의 hashTable에 타입과 리스트를 넣어준다.
+		
+		//변경된 부분을 가져와서 객체에 넣어준다.
 		for (Delta delta : patch.getDeltas()) {
-			hash.put(delta.getRevised().getPosition(), delta.getRevised().getLines());
+			//delete 타입인경우 delete 리스트에 넣어준다.
+			if(delta.getType().toString().contains("DELETE")){
+				delete.add(delta.getRevised().getPosition());
+			}else{
+				//나머지경우 chageAdd hash에 넣어준다.
+				changeAdd.put(delta.getRevised().getPosition(), delta.getRevised().getLines());
+			}
+			//타입을 넣어준다.
 			typeHash.put(delta.getRevised().getPosition(), typeChange(delta.getType().toString()));
 		}
 
 		try {
+			//변경된 부분 리스트를 가져온다.
 			List<String> result = (List<String>) patch.applyTo(original);
 
 			if (!result.equals(revised)) {
 				return null;
 			}
 
-			StringBuilder stringList = new StringBuilder();
+			//결과를 저장할 리스트 선언 
+			List<String> stringList = new ArrayList<>();
 
+			//변경된 부분들에 태크를 붙여 저장한다.
 			for (int i = 0; i < result.size(); i++) {
 				String s = result.get(i);
-				// 변경,삭제,삽입된 부분이 있는경우 앞부분을 보기 쉽게 바꿔준다.
-				if (hash.containsKey(i)) {
-					// 바뀐 문장의 길이만큼 태그를 붙여준다.
-					List<String> re = (List<String>) hash.get(i);
+				// 변경,삽입된 부분이 있는경우 태그를 붙여준다.
+				if (changeAdd.containsKey(i)) {
+					//변경된 부분을 가져온다.
+					List<String> re = (List<String>) changeAdd.get(i);
+					// 바뀐 부분이 붙어있으면 결과가 한줄로 나오기때문에 반복문을 돌면서 태그를 다 붙여준다.
 					for (int j = 0; j < re.size(); j++) {
 						String change = result.get(i + j);
 						if (change.equals(re.get(j))) {
-							// 타입을 붙여준다.
 							result.set(i + j, typeHash.get(i) + change);
 						}
 					}
 				}
 				s = result.get(i);
 				if (i != result.size() - 1) {
-					stringList.append(s + splitValue);
+					stringList.add(s + splitValue);
 				}else{
-					stringList.append(s);
+					stringList.add(s);
 				}
 
 			}
 
-			String merge = String.valueOf(stringList);
-
+			//삭제된 부분의 타입을 list에 넣어준다.
+			for(int i=0;i<delete.size();i++){
+				//delete이면 (자기의 인덱스 -1 + position)의 자리에 $del 넣기
+				int position = delete.get(i)+i+1;
+				stringList.add(position-1, Type.DELETE.getType()+"\n");
+			}
+			
+			StringBuilder merge = new StringBuilder();
+			for(int i=0;i<stringList.size();i++){
+				merge.append(stringList.get(i));
+			}
+			String returnResult = String.valueOf(merge);
 			// 결과 보내줌
-			return merge;
+			return returnResult;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
