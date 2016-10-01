@@ -41,6 +41,38 @@ public class FileToText {
 	private static Hashtable<Integer, String> typeHash;
 
 	/*
+	 * 두개의 파일을 내용을 비교해주고 byte[]로 보내주는 메소드 
+	 *  파라미터 1 : 이전 버전  파일 경로
+	 *  파라미터 2 : 다음 버전 파일 경로 
+	 */
+	public static byte[] compareTextToByte(String firstFile,String secondFile){
+		String firstString = "";
+		String secondString = "";
+		if(firstFile.endsWith("hwp")){
+			firstString = hwpFileContentParser(firstFile);
+		}else if(firstFile.endsWith("docx")){
+			firstString = docxFileContentParser(firstFile);
+		}else if(firstFile.endsWith("doc")){
+			firstString = docFileContentParser(firstFile);
+		}else{
+			return "error".getBytes();
+		}
+		
+		if(secondFile.endsWith("hwp")){
+			secondString = hwpFileContentParser(secondFile);
+		}else if(secondFile.endsWith("docx")){
+			secondString = docxFileContentParser(secondFile);
+		}else if(secondFile.endsWith("doc")){
+			secondString = docFileContentParser(secondFile);
+		}else{
+			return "error".getBytes();
+		}
+		
+		String result = getDiff(firstString,secondString,"\n");
+		
+		return result.getBytes();
+	}
+	/*
 	 * 두개의 파일을 내용을 비교해주는 메소드
 	 *  파라미터 1 : 이전 버전  파일 경로
 	 *  파라미터 2 : 다음 버전 파일 경로 
